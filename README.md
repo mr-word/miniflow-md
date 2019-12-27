@@ -43,11 +43,11 @@ Input = UTag
 
 ```
 Output: RLP(
-  0 / left    : WORD    1 to 32 bytes
-, 1 / right   : WORD    1 to 32 bytes
-, 2 / data    : BLOB    0 to 2^16 bytes 
-, 3 / quorum  : WORD    0 to 1 bytes
-, 4 / pubkeys : [Pubkey]  max 255 * sizeof(Pubkey)
+  0 / left    : WORD      # 1 to 32 bytes
+, 1 / right   : WORD      # 1 to 32 bytes
+, 2 / data    : BLOB      # 0 to 2^16 bytes 
+, 3 / quorum  : WORD      # 0 to 1 bytes
+, 4 / pubkeys : [Pubkey]  # max 255 * sizeof(Pubkey)
 )
 ```
 
@@ -65,7 +65,7 @@ Action: RLP(
 , 1 / validUntil : WORD
 , 2 / inputs     : [Input]
 , 3 / outputs    : [Output]
-, 4 / signatures : [SIGNATURE(HASH(RLP(validSince,...,pubkeys)))] // sign hash of above fields RLP encoded in order (not raw prefix)
+, 4 / signatures : [SIGNATURE(HASH(RLP(validSince,validUntil,inputs,outputs)))] // sign hash of above fields RLP encoded in order (not raw prefix)
 , 5 / xtra       : WORD // can be modified by block producer, ignored by validation
 )
 ```
@@ -87,7 +87,7 @@ Header: RLP(
 , 3 / node : PUBKEY
 , 4 / time : WORD
 , 5 / fuzz : WORD
-, 6 / work : HASH(mixhash, fuzz) where mixhash = CONCAT(prev, root, xtrb, node, time)
+, 6 / work : HASH(mixhash, fuzz) where mixhash = HASH(CONCAT(prev, root, xtrb, node, time))
 )
 ```
 
@@ -97,9 +97,9 @@ Header: RLP(
 * `node` is a public key
 * `time` is a timestamp
 * `fuzz` is 1-32 bytes of nonce data for the proof-of-work
-* `work` is the proof-of-work, `HASH(mixhash, fuzz)` where `mixhash = CONCAT(prev, root, xtrb, node, time)`.
+* `work` is the proof-of-work, `HASH(mixhash, fuzz)` where `mixhash = HASH(CONCAT(prev, root, xtrb, node, time))`.
 
-##### HeadID
+#### HeadID
 
 `headID` is `hash(Header)`, the hash of the entire RLP-encoded header.
 
@@ -150,7 +150,7 @@ An action is valid if:
 * `block.time < validUntil`
 * All inputs in `inputs` are valid
 * All outputs in `outputs` are valid
-* All signatures in `signatures` validate for `SIGN(HASH(RLP(validSince...pubkeys)))` of the entire transaction of inputs they consume. Any bad signature fails the transaction even if a quorum of good signatures exists.
+* All signatures in `signatures` validate for `SIGN(HASH(RLP(validSince,validUntil,inputs,outputs)))` of the entire transaction of inputs they consume. Any bad signature fails the transaction even if a quorum of good signatures exists.
 * `xtra` is ignored by validation and can be malleated by miners.
 
 Plus [interval validation](Intervals)

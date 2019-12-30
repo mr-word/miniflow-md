@@ -87,7 +87,6 @@ Header: RLP(
 , 3 / node : PUBKEY
 , 4 / time : WORD
 , 5 / fuzz : WORD
-, 6 / work : HASH(mixhash, fuzz) where mixhash = HASH(CONCAT(prev, root, xtrb, node, time))
 )
 ```
 
@@ -97,11 +96,10 @@ Header: RLP(
 * `node` is a public key
 * `time` is a timestamp
 * `fuzz` is 1-32 bytes of nonce data for the proof-of-work
-* `work` is the proof-of-work, `HASH(mixhash, fuzz)` where `mixhash = HASH(CONCAT(prev, root, xtrb, node, time))`.
 
 #### HeadID
 
-`headID` is `hash(Header)`, the hash of the entire RLP-encoded header.
+`headID` is `hash(mixHash, fuzz)`, where `mixhash := HASH(CONCAT(prev, root, xtrb, node, time))`
 
 ### Block
 
